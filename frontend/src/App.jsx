@@ -84,14 +84,28 @@ export default function App() {
     loadRestaurants();
   }, []);
 
+
   const filteredRestaurants = restaurants
-    .filter((restaurant) =>
-      `${restaurant.name} ${restaurant.cuisine}`
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    )
+    .filter((restaurant) => {
+      const matchesSearch =
+        `${restaurant.name} ${restaurant.cuisine}`
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchesCuisine =
+        selectedCuisine === "All" ||
+        restaurant.cuisine === selectedCuisine;
+
+      return matchesSearch && matchesCuisine;
+    })
     .sort((a, b) => {
-      if (sortBy === "rating") return b.rating - a.rating;
+      if (sortBy === "rating") {
+        return b.rating - a.rating;
+      }
+
+      if (sortBy === "discount") {
+        return b.discount_percent - a.discount_percent;
+      }
 
       return (
         estimateBill(a, people).total -
@@ -99,10 +113,11 @@ export default function App() {
       );
     });
 
+
 const availableCuisines = [
   "All",
   ...new Set(
-    restaurantProfiles
+    restaurants
       .map((restaurant) => restaurant.cuisine)
       .filter(Boolean)
   ),
@@ -202,8 +217,8 @@ mostExpensive && estimateBill(mostExpensive, people).total > 0
 
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="zappit-page min-h-screen bg-slate-50 text-slate-900">
+      <header className="zappit-header border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <a href="#" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-600 text-white">
@@ -211,7 +226,7 @@ mostExpensive && estimateBill(mostExpensive, people).total > 0
             </div>
             <div>
               <h1 className="text-2xl font-black tracking-tight">
-                Dine<span className="text-green-600">Wise</span>
+                Zappit
               </h1>
               <p className="text-xs text-slate-500">
                 Compare. Calculate. Dine.
@@ -226,8 +241,8 @@ mostExpensive && estimateBill(mostExpensive, people).total > 0
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-        <section className="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-10 text-white sm:px-10 sm:py-14">
+      <main className="zappit-main mx-auto max-w-7xl px-5 py-10 lg:px-8">
+        <section className="zappit-hero relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-10 text-white sm:px-10 sm:py-14">
           <div className="relative z-10 max-w-2xl">
             <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold tracking-wide text-green-300">
               YOUR DINING BUDGET, SORTED
@@ -426,18 +441,6 @@ mostExpensive && estimateBill(mostExpensive, people).total > 0
             </div>
           )}
 
-          {error && (
-            <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && filteredRestaurants.length === 0 && (
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-              No restaurants match your search. Try another name or cuisine.
-            </div>
-          )}
-          
           {error && (
             <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
               {error}
@@ -654,7 +657,7 @@ mostExpensive && estimateBill(mostExpensive, people).total > 0
             )}
   
           {filteredRestaurants.length > 1 && (
-            <section className="mt-8 rounded-2xl border border-green-200 bg-green-50 p-6">
+            <section className="zappit-restaurants mt-8 rounded-2xl border border-green-200 bg-green-50 p-6">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
                   <TrendingDown size={24} />
